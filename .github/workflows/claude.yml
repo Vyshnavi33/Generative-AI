@@ -30,6 +30,18 @@ jobs:
         with:
           fetch-depth: 1
 
+      - name: Project Setup
+        run: |
+          npm run setup
+          npm run dev:daemon
+  
+        # If your project requires specific permissions or setup for Claude, you can configure that here as well.
+  
+        # Example: If you want to allow Claude to use a specific tool, you can add it to the claude_args in the next step.
+  
+        # Note: The exact setup steps will depend on your project's requirements and the tasks you want Claude to perform.
+  
+        # You can also set up any necessary environment variables or secrets that Claude might need to access during its execution.
       - name: Run Claude Code
         id: claude
         uses: anthropics/claude-code-action@v1
@@ -48,3 +60,23 @@ jobs:
           # or https://code.claude.com/docs/en/cli-reference for available options
           # claude_args: '--allowed-tools Bash(gh pr:*)'
 
+          custom_instructions: |
+            The project is already setup with all the dependencies installed.
+            The server is already running at localhost:3000. Logs from it are being written to logs.txt.
+            If needed, you can query the db with the 'sqlite3' cli. If needed, use the mcp__playwright set of tools to launch a browser and interact with the app.
+
+          
+          mcp_config: |
+            {
+              "mcpServers": {
+              "playwright": {
+                "command": "npx",
+                "args": ["playwright/mcp@latest",
+                 "--allowed-origins", 
+                 "localhost:3000;cdn.tailwindcss.com;esm.sh"
+                 ]
+                }
+              }
+            }
+
+            allowed_tools: "Bash(sqlite3), mcp__playwright__browser_snapshot, mcp__playwright__click, mcp__playwright__fill, mcp__playwright__goto"
